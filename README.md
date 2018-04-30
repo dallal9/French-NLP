@@ -1,11 +1,11 @@
 # Smartly.AI DeepSpeech
 **Table of Contents**
 
--	[Pre-processing utility](#Pre-processing-utility)
--	[The SIWIS French Speech Dataset](#The-SIWIS-French-Speech-Dataset)
--	[French Pre-trained model](#French-Pre-trained-model)
--	[Train a model](#Train-a-model)
--	[Process Audio](#Process-Audio) 
+-	[Pre-processing utility](#pre-processing-utility)
+-	[The SIWIS French Speech Dataset](#the-siwis-french-speech-dataset)
+-	[French Pre-trained model](#french-pre-trained-model)
+-	[Train a model](#train-a-model)
+-	[Process Audio](#process-Audio) 
 
 ## Pre-processing utility
 
