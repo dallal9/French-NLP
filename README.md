@@ -1,15 +1,10 @@
-# French-NLP
 # Smartly.AI DeepSpeech
 **Table of Contents**
 
 -	[Pre-processing utility](#Pre-processing-utility)
-
 -	[The SIWIS French Speech Dataset](#The-SIWIS-French-Speech-Dataset)
-
 -	[French Pre-trained model](#French-Pre-trained-model)
-
 -	[Train a model](#Train-a-model)
-
 -	[Process Audio](#Process-Audio) 
 
 ## Pre-processing utility
@@ -76,7 +71,7 @@ See the output of `deepspeech -h` for more information on the use of `deepspeech
 - [Code documentation](#code-documentation)
 - [Contact/Getting Help](#contactgetting-help)
 
-## Prerequisites
+## Prereqisites
 
 * [Python 3.6](https://www.python.org/)
 * [Git Large File Storage](https://git-lfs.github.com/)
