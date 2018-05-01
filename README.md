@@ -51,9 +51,11 @@ Text files contains the transcript of each sound file in one line and it is utf-
 
 The dataset was split into three parts, training, validation (dev), and testing. Following the rations 70%, 20%, and 10% , in order. For each part, we created a directory containing the ‘wav’ files corresponding to the part and a CSV file describing the full location of each sound file, the file size, and the text transcript of the sound file.
 
+```bash
+/deepspeech/DeepSpeech/data/test/neut_book_s06_0349.wav,482580,cette jalousie qui ne venait que de sa vanité lui fit penser quil aimait éperdument sémire
 ```
-/deepspeech/DeepSpeech/data/test/neut_book_s06_0349.wav,482580,cette jalousie qui ne venait que de sa vanité lui fit penser quil aimait éperdument sémire```
-```
+
+```bash
 /deepspeech/DeepSpeech/data/test/neut_book_s01_0004.wav,846838,il filait comme un ballon emporté par le vent au-dessus des prairies terrestres mais il serait plus vrai de dire que nous étions dans ce salon comme dans le wagon dun train express
 ```
 After processing we have three directories train, dev, and test with the associated ‘wav’ files and on CSV file describing the data in the directory. 
