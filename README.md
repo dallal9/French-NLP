@@ -2,22 +2,132 @@
 **Table of Contents**
 
 -	[Pre-processing utility](#pre-processing-utility)
--	[The SIWIS French Speech Dataset](#the-siwis-french-speech-dataset)
 -	[French Pre-trained model](#french-pre-trained-model)
--	[Train a model](#train-a-model)
--	[Process Audio](#process-Audio) 
+-	[Process Audio](#process-audio) 
 
 ## Pre-processing utility
+The script is found under the `util` directory 
 
-## The SIWIS French Speech Dataset
+```
+/util/preprocess.py
+```
+
+Preprocess is a class designed to prepare any dataset (sound files and text files) to be used with the DeepSpeech model. 
+
+The class takes three inputs:
+ 
+`wav_path`:  the path of the main directory that contains the 'wav' sound files.
+ 
+`text_path`: the path of the main directory that contains the "txt" files for the transcripts. If it is None, the value if the path will be same as `wav_path` but instead of last directory to be 'wavs' it will be 'text'.
+
+`model_path`: the path for the output directory. 
+
+The output is:
+
+- Three CSV files for training, validation, testing (train.csv, dev.csv, test.csv). Containing the path of wav files, their size, and the transcript. `wav_filename,wav_filesize,transcript`
+- sound files are copied into three directories, train, dev, and test with the ratio 70%, 20%, 10% in order.
+- `vocabulary.txt` is an output text file containing the text of all transcripts. 
+
+This class was designed mainly for the dataset described in the following section, but it can be used was any other datasets and sometimes some specific changed might be needed. 
+
 
 ## French Pre-trained model
 
-## Train a model
+Using the preprocessing script, we were able to use 'The SIWIS French Speech Dataset' with DeepSpeech model. 
+
+### The SIWIS French Speech Dataset
+
+https://datashare.is.ed.ac.uk/handle/10283/2353
+The data set consists of 9750 high quality French speech recordings and associated transcripts as text files. The set is from various sources such as parliament debates and novels were uttered by a professional French voice talent. The sound tracks are between 3 and 6 seconds and the set in total, has more than ten hours of speech data and is freely available. The sound files are in ‘wav’ format and have the following parameters:
+ 
+Channels       : 1 (mono)
+Sample Rate    : 16000
+Precision      : 16-bit
+Bit Rate       : 256k
+ 
+Text files contains the transcript of each sound file in one line and it is utf-8 encoded.
+
+### Training the model
+
+The dataset was split into three parts, training, validation (dev), and testing. Following the rations 70%, 20%, and 10% , in order. For each part, we created a directory containing the ‘wav’ files corresponding to the part and a CSV file describing the full location of each sound file, the file size, and the text transcript of the sound file.
+
+```
+/deepspeech/DeepSpeech/data/test/neut_book_s06_0349.wav,482580,cette jalousie qui ne venait que de sa vanité lui fit penser quil aimait éperdument sémire```
+```
+/deepspeech/DeepSpeech/data/test/neut_book_s01_0004.wav,846838,il filait comme un ballon emporté par le vent au-dessus des prairies terrestres mais il serait plus vrai de dire que nous étions dans ce salon comme dans le wagon dun train express
+```
+After processing we have three directories train, dev, and test with the associated ‘wav’ files and on CSV file describing the data in the directory. 
+DeepSpeech Model Components:
+
+Alphabet: we had to create a text file containing the alphabet. For French model, we had 41 characters which included 26 letter (a-z), 13 letter with accents `(à, â, é, è, î, ê, û, ç, ô, ï, ë, ö, Ç, É, ü, ù)` and two special character apostrophe (‘) and dash (-). The characters were saved into a text file encoded in utf-8. 
+
+Vocabulary: we had to create a text file containing all the transcripts of the data set to represent the vocabulary of the model 
+
+binary file:
+
+trie file: trie is a search tree data structure which stores associative array where the keys are usually strings. using both alphabet, and vocabulary files and using  Kenlm tools we build the language model on three steps:
+
+First creating arpa file:
+
+`/bin/bin/./lmplz --text vocabulary.txt --arpa  words.arpa --o 3`
+Second creating binary file:
+
+`/bin/bin/./build_binary -T -s words.arpa  lm.binary`
+
+Third creating trie file:
+
+`/home/tensorflow/bin/native_client/generate_trie /home/DeepSpeech/data/alphabet.txt /home/DeepSpeech/data/lm.binary /home/DeepSpeech/data/vocabulary.txt /home/DeepSpeech/data/trie`
+
+start training:
+
+
+```python
+python -u DeepSpeech.py \
+  --train_files /home/DeepSpeech/data/train/train.csv \
+  --dev_files /home/DeepSpeech/data/dev/dev.csv \
+  --test_files /home/DeepSpeech/data/test/test.csv \
+  --train_batch_size 80 \
+  --dev_batch_size 80 \
+  --test_batch_size 40 \
+  --n_hidden 375 \
+  --epoch 1000 \
+  --validation_step 1 \
+  --early_stop True \
+  --earlystop_nsteps 6 \
+  --estop_mean_thresh 0.1 \
+  --estop_std_thresh 0.1 \
+  --dropout_rate 0.22 \
+  --learning_rate 0.00095 \
+  --report_count 100 \
+  --use_seq_length False \
+  --export_dir /home/DeepSpeech/data/results/model_export/ \
+  --checkpoint_dir /home/DeepSpeech/data/results/checkout/ \
+  --decoder_library_path /home/tensorflow/bin/native_client/libctc_decoder_with_kenlm.so \
+  --alphabet_config_path /home/DeepSpeech/data/alphabet.txt \
+  --lm_binary_path /home/DeepSpeech/data/lm.binary \
+  --lm_trie_path /home/DeepSpeech/data/trie \
+  "$@"
+
+```
+
+### Training Results
+
+Early stop triggered as (for last 6 steps) `validation loss: 49.096215 with standard deviation: 0.509410 and mean: 47.513038`
+
+`FINISHED Optimization - training time: 0:14:04`
+
+
+`Test of Epoch 62 - WER: 0.273613, loss: 34.48145739237467, mean edit distance: 0.165131`
+
+(Word error rate (WER) is a common metric for the performance of a speech recognition.) 
+
 
 ## Process Audio
 
+In order to generate a text for a certain sound file we have to call the DeepSpeech pre-built library. 
 
+for example: 
+`./deepspeech /data1/deepspeech/DeepSpeech/models/swdb/results/model_export160/output_graph.pb models/swdb/alphabet.txt /data1/deepspeech/DeepSpeech/test/neut_parl_s06_0004.wav`
 
 # Project DeepSpeech
 
@@ -71,7 +181,7 @@ See the output of `deepspeech -h` for more information on the use of `deepspeech
 - [Code documentation](#code-documentation)
 - [Contact/Getting Help](#contactgetting-help)
 
-## Prereqisites
+## Prerequisites
 
 * [Python 3.6](https://www.python.org/)
 * [Git Large File Storage](https://git-lfs.github.com/)
@@ -389,4 +499,3 @@ There are several ways to contact us or to get help:
 
 3. [**IRC**](https://wiki.mozilla.org/IRC) - If your question is not addressed by either the [FAQ](https://github.com/mozilla/DeepSpeech/wiki#frequently-asked-questions) or [Discourse Forums](https://discourse.mozilla.org/c/deep-speech), you can contact us on the `#machinelearning` channel on [Mozilla IRC](https://wiki.mozilla.org/IRC); people there can try to answer/help
 
-4. [**Issues**](https://github.com/mozilla/deepspeech/issues) - Finally, if all else fails, you can open an issue in our repo.
