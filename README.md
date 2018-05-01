@@ -83,7 +83,7 @@ Third creating trie file:
 start training:
 
 
-```python
+```bash
 python -u DeepSpeech.py \
   --train_files /home/DeepSpeech/data/train/train.csv \
   --dev_files /home/DeepSpeech/data/dev/dev.csv \
